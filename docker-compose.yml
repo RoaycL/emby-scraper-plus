@@ -8,6 +8,7 @@ services:
       - "8080:8080"
     environment:
       - PORT=8080
+      - TOKEN=
       # 若国内环境需要代理访问部分外部数据源，可配置以下代理：
       # - HTTP_PROXY=http://192.168.1.100:7890
       # - HTTPS_PROXY=http://192.168.1.100:7890
