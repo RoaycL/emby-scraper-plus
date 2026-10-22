@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emby Scraper Plus - 媒体刮削服务控制台</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: #10b981;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .badge {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .search-box {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 28px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .input-group {
+      display: flex;
+      gap: 12px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: var(--text);
+      font-size: 16px;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+    button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: var(--primary-hover); }
+    .status-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .card-val {
+      font-size: 18px;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+    .result-section {
+      display: none;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .media-card {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .media-card { grid-template-columns: 1fr; }
+    }
+    .poster-img {
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+      background: #0f172a;
+    }
+    .media-details h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: #f1f5f9;
+    }
+    .meta-tag {
+      display: inline-block;
+      background: #334155;
+      color: #cbd5e1;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    .desc {
+      color: var(--text-muted);
+      margin: 14px 0;
+      font-size: 14px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .btn-secondary {
+      background: #334155;
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    pre {
+      background: #0f172a;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 13px;
+      color: #38bdf8;
+      border: 1px solid var(--border);
+      margin-top: 16px;
+      max-height: 350px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <span>🍑 Emby Scraper Plus</span>
+        <span class="badge">v1.0.0</span>
+      </div>
+      <div>
+        <a href="https://github.com/RoaycL/emby-scraper-plus" target="_blank" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">GitHub 仓库 ↗</a>
+      </div>
+    </header>
+
+    <div class="status-panel">
+      <div class="card">
+        <div class="card-title">服务运行状态</div>
+        <div class="card-val" style="color: var(--accent);">● 正常运行 (Online)</div>
+      </div>
+      <div class="card">
+        <div class="card-title">集成数据源</div>
+        <div class="card-val">DMM / R18Dev / AVBase / Gfriends</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Emby / Jellyfin 协议</div>
+        <div class="card-val">MetaTube REST v1 兼容</div>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <h3 style="margin-bottom: 12px; font-size: 16px;">🔍 番号在线测试与解析</h3>
+      <div class="input-group">
+        <input type="text" id="keyword" placeholder="输入番号测试，例如：SSIS-057、ABW-358、START-640" value="SSIS-057" onkeydown="if(event.key==='Enter') search();">
+        <button onclick="search()">立即刮削</button>
+      </div>
+    </div>
+
+    <div id="result" class="result-section">
+      <div class="media-card">
+        <div>
+          <img id="poster" class="poster-img" src="" alt="封面">
+        </div>
+        <div class="media-details">
+          <h2 id="title">-</h2>
+          <div style="margin-bottom: 10px;">
+            <span id="number-badge" class="meta-tag" style="background: #2563eb; color: #fff;">-</span>
+            <span id="maker-badge" class="meta-tag">-</span>
+            <span id="date-badge" class="meta-tag">-</span>
+          </div>
+          <div id="actors" style="margin-bottom: 10px;"></div>
+          <div id="genres" style="margin-bottom: 10px;"></div>
+          <p id="summary" class="desc">-</p>
+          <div class="actions">
+            <button id="nfo-btn" class="btn-secondary" onclick="downloadNfo()">📥 下载 NFO 边车文件</button>
+            <button class="btn-secondary" onclick="toggleJson()">📜 查看原始 JSON</button>
+          </div>
+        </div>
+      </div>
+      <pre id="raw-json" style="display: none;"></pre>
+    </div>
+
+    <div class="card" style="margin-top: 24px;">
+      <h4 style="margin-bottom: 8px;">💡 在 fnOS 上的 Emby 配置指南：</h4>
+      <p style="font-size: 14px; color: var(--text-muted);">
+        1. 在 Emby 中安装 <code>Jellyfin.Plugin.MetaTube</code> 插件。<br>
+        2. 打开插件配置页，将 <strong>服务器地址 (Server)</strong> 填写为：<code style="color: #60a5fa;">http://&lt;你的fnOS或本机IP&gt;:8080</code>。<br>
+        3. 保存后，Emby 即可通过智能路由与极速 GraphQL 接口自动刮削电影与人员头像！
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let currentCode = '';
+    async function search() {
+      const kw = document.getElementById('keyword').value.trim();
+      if (!kw) return;
+      currentCode = kw;
+      const resSec = document.getElementById('result');
+      resSec.style.display = 'block';
+      document.getElementById('title').innerText = '正在智能路由刮削中...';
+
+      try {
+        const resp = await fetch('/v1/movies/SMART/' + encodeURIComponent(kw));
+        const json = await resp.json();
+        if (json.data) {
+          const item = json.data;
+          document.getElementById('title').innerText = item.title || kw;
+          document.getElementById('number-badge').innerText = item.number || kw;
+          document.getElementById('maker-badge').innerText = item.maker ? '片商: ' + item.maker : '';
+          document.getElementById('date-badge').innerText = item.release_date ? '发售: ' + item.release_date : '';
+          document.getElementById('summary').innerText = item.summary || '暂无简介';
+          document.getElementById('poster').src = item.cover_url || '';
+
+          const actorsDiv = document.getElementById('actors');
+          actorsDiv.innerHTML = '<strong>出演人员：</strong>' + (item.actors && item.actors.length ? item.actors.map(a => `<span class="meta-tag">${a}</span>`).join('') : '<span style="color:var(--text-muted)">未知</span>');
+
+          const genresDiv = document.getElementById('genres');
+          genresDiv.innerHTML = item.genres && item.genres.length ? item.genres.map(g => `<span class="meta-tag" style="background:#1e3a8a;color:#93c5fd;">${g}</span>`).join('') : '';
+
+          document.getElementById('raw-json').innerText = JSON.stringify(json.data, null, 2);
+        } else {
+          document.getElementById('title').innerText = '未检索到该番号信息：' + (json.error ? json.error.message : '');
+          document.getElementById('raw-json').innerText = JSON.stringify(json, null, 2);
+        }
+      } catch (err) {
+        document.getElementById('title').innerText = '请求失败：' + err.message;
+      }
+    }
+
+    function toggleJson() {
+      const el = document.getElementById('raw-json');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function downloadNfo() {
+      if (currentCode) {
+        window.open('/v1/nfo/SMART/' + encodeURIComponent(currentCode), '_blank');
+      }
+    }
+  </script>
+</body>
+</html>
