@@ -247,7 +247,7 @@ func (p *Provider) GetMovieInfo(ctx context.Context, id string) (*model.MovieInf
 			Title:       c.Title,
 			CoverURL:    cover,
 			ThumbURL:    c.PackageImage.MediumURL,
-			ReleaseDate: releaseDate,
+			ReleaseDate: model.Date(releaseDate),
 			Actors:      actors,
 		},
 		Summary:       c.Description,
@@ -264,6 +264,11 @@ func (p *Provider) GetMovieInfo(ctx context.Context, id string) (*model.MovieInf
 }
 
 func (p *Provider) SearchMovie(ctx context.Context, keyword string) ([]*model.MovieSearchResult, error) {
+	// Fast path: if keyword is a movie ID or number, fetch direct info
+	if info, err := p.GetMovieInfo(ctx, keyword); err == nil && info != nil && info.Title != "" {
+		return []*model.MovieSearchResult{&info.MovieSearchResult}, nil
+	}
+
 	query := `query Search($query: String!) {
 		legacySearchPPV(query: $query, limit: 10) {
 			contents {
@@ -320,7 +325,7 @@ func (p *Provider) SearchMovie(ctx context.Context, keyword string) ([]*model.Mo
 			Title:       item.Title,
 			CoverURL:    cover,
 			ThumbURL:    item.PackageImage.MediumURL,
-			ReleaseDate: releaseDate,
+			ReleaseDate: model.Date(releaseDate),
 			Actors:      actors,
 		})
 	}

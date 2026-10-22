@@ -18,7 +18,7 @@ func TestWriteXML(t *testing.T) {
 			Title:       "Test Movie Title",
 			Provider:    "DMM",
 			CoverURL:    "https://example.com/cover.jpg",
-			ReleaseDate: relDate,
+			ReleaseDate: model.Date(relDate),
 			Actors:      []string{"Actor A", "Actor B"},
 		},
 		Summary:     "Test overview plot summary.",

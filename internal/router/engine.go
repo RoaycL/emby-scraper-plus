@@ -169,6 +169,11 @@ func (e *Engine) SmartSearch(ctx context.Context, keyword string) ([]*model.Movi
 		}
 	}
 
+	// Fallback to SmartGetMovieInfo in case direct provider search returned empty but movie exists
+	if info, err := e.SmartGetMovieInfo(ctx, clean); err == nil && info != nil && info.Title != "" {
+		return []*model.MovieSearchResult{&info.MovieSearchResult}, nil
+	}
+
 	return nil, fmt.Errorf("no search results for keyword: %s", keyword)
 }
 

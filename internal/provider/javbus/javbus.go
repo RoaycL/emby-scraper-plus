@@ -115,7 +115,7 @@ func (p *Provider) GetMovieInfo(ctx context.Context, id string) (*model.MovieInf
 		case strings.Contains(header, "發行日期") || strings.Contains(header, "发行日期"):
 			dateStr := strings.TrimSpace(strings.ReplaceAll(text, header, ""))
 			if t, err := time.Parse("2006-01-02", dateStr); err == nil {
-				info.ReleaseDate = t
+				info.ReleaseDate = model.Date(t)
 			}
 		case strings.Contains(header, "長度") || strings.Contains(header, "长度"):
 			var mins int
@@ -211,7 +211,7 @@ func (p *Provider) SearchMovie(ctx context.Context, keyword string) ([]*model.Mo
 			Title:       title,
 			CoverURL:    img,
 			ThumbURL:    img,
-			ReleaseDate: relDate,
+			ReleaseDate: model.Date(relDate),
 		})
 	})
 

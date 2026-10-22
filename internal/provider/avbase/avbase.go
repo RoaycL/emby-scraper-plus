@@ -119,7 +119,7 @@ func (p *Provider) SearchMovie(ctx context.Context, keyword string) ([]*model.Mo
 			Title:       w.Title,
 			CoverURL:    cover,
 			ThumbURL:    cover,
-			ReleaseDate: releaseDate,
+			ReleaseDate: model.Date(releaseDate),
 			Actors:      w.Actors,
 		})
 	}

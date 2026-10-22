@@ -113,7 +113,7 @@ func (p *Provider) SearchMovie(ctx context.Context, keyword string) ([]*model.Mo
 			Title:       title,
 			CoverURL:    img,
 			ThumbURL:    img,
-			ReleaseDate: relDate,
+			ReleaseDate: model.Date(relDate),
 		})
 	})
 
@@ -164,7 +164,7 @@ func (p *Provider) GetMovieInfo(ctx context.Context, id string) (*model.MovieInf
 			info.Number = val
 		case strings.Contains(label, "日期"):
 			if t, err := time.Parse("2006-01-02", val); err == nil {
-				info.ReleaseDate = t
+				info.ReleaseDate = model.Date(t)
 			}
 		case strings.Contains(label, "時長") || strings.Contains(label, "时长"):
 			var mins int

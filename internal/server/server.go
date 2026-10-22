@@ -15,6 +15,7 @@ import (
 func SetupRouter(engine *router.Engine) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	r.RemoveExtraSlash = true
 
 	// CORS middleware
 	r.Use(func(c *gin.Context) {
@@ -50,8 +51,8 @@ func SetupRouter(engine *router.Engine) *gin.Engine {
 			return
 		}
 
-		// Skip image proxy endpoints from strict auth to allow media players to display covers directly
-		if strings.HasPrefix(c.Request.URL.Path, "/v1/images/") {
+		// Skip image proxy and translate endpoints from strict auth
+		if strings.HasPrefix(c.Request.URL.Path, "/v1/images/") || strings.HasPrefix(c.Request.URL.Path, "/v1/translate") {
 			c.Next()
 			return
 		}
@@ -95,17 +96,28 @@ func SetupRouter(engine *router.Engine) *gin.Engine {
 		v1.GET("/actors/:provider/:id", h.GetActor)
 
 		// Image Proxy endpoints
-		v1.GET("/images/primary/:provider/:id", proxyImageHandler)
-		v1.GET("/images/thumb/:provider/:id", proxyImageHandler)
-		v1.GET("/images/backdrop/:provider/:id", proxyImageHandler)
+		v1.GET("/images/primary/:provider/:id", h.ProxyImage)
+		v1.GET("/images/thumb/:provider/:id", h.ProxyImage)
+		v1.GET("/images/backdrop/:provider/:id", h.ProxyImage)
 
 		// Direct NFO download endpoint
 		v1.GET("/nfo/:provider/:id", h.DownloadNFO)
 
-		// Translation passthrough
+		// Translation passthrough (MetaTube TranslationInfo format)
 		v1.GET("/translate", func(c *gin.Context) {
-			text := c.Query("text")
-			c.JSON(http.StatusOK, gin.H{"data": text})
+			q := c.Query("q")
+			if q == "" {
+				q = c.Query("text")
+			}
+			from := c.Query("from")
+			to := c.Query("to")
+			c.JSON(http.StatusOK, gin.H{
+				"data": gin.H{
+					"from":            from,
+					"to":              to,
+					"translated_text": q,
+				},
+			})
 		})
 	}
 

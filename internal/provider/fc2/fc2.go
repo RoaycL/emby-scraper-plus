@@ -166,7 +166,7 @@ func (p *Provider) GetMovieInfo(ctx context.Context, id string) (*model.MovieInf
 			Title:       art.Title,
 			CoverURL:    art.MainImage,
 			ThumbURL:    art.MainImage,
-			ReleaseDate: releaseDate,
+			ReleaseDate: model.Date(releaseDate),
 			Actors:      actors,
 		},
 		BigCoverURL: art.MainImage,
