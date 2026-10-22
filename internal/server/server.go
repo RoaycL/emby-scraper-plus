@@ -3,8 +3,10 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/RoaycL/emby-scraper-plus/config"
+	"github.com/RoaycL/emby-scraper-plus/internal/model"
 	"github.com/RoaycL/emby-scraper-plus/internal/router"
 	"github.com/RoaycL/emby-scraper-plus/internal/web"
 	"github.com/gin-gonic/gin"
@@ -18,7 +20,7 @@ func SetupRouter(engine *router.Engine) *gin.Engine {
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Token")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
 			return
@@ -34,13 +36,55 @@ func SetupRouter(engine *router.Engine) *gin.Engine {
 	r.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "ok",
-			"time":   c.GetString("time"),
 		})
 	})
 
 	h := NewHandler(engine)
 
 	v1 := r.Group("/v1")
+	// Token authentication middleware
+	v1.Use(func(c *gin.Context) {
+		serverToken := strings.TrimSpace(config.GlobalConfig.Token)
+		if serverToken == "" {
+			c.Next()
+			return
+		}
+
+		// Skip image proxy endpoints from strict auth to allow media players to display covers directly
+		if strings.HasPrefix(c.Request.URL.Path, "/v1/images/") {
+			c.Next()
+			return
+		}
+
+		clientToken := ""
+		authHeader := c.GetHeader("Authorization")
+		if authHeader != "" {
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+				clientToken = strings.TrimSpace(parts[1])
+			} else {
+				clientToken = strings.TrimSpace(authHeader)
+			}
+		}
+		if clientToken == "" {
+			clientToken = strings.TrimSpace(c.GetHeader("X-Token"))
+		}
+		if clientToken == "" {
+			clientToken = strings.TrimSpace(c.Query("token"))
+		}
+
+		if clientToken != serverToken {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, model.Response[any]{
+				Error: &model.ErrorInfo{
+					Code:    http.StatusUnauthorized,
+					Message: "unauthorized: invalid or missing token",
+				},
+			})
+			return
+		}
+		c.Next()
+	})
+
 	{
 		// Movie endpoints (MetaTube spec)
 		v1.GET("/movies/search", h.SearchMovie)

@@ -31,8 +31,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 28px;
-      padding-bottom: 20px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
       border-bottom: 1px solid var(--border);
     }
     .logo {
@@ -55,24 +55,28 @@
       padding: 20px;
       border-radius: 12px;
       border: 1px solid var(--border);
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .input-group {
-      display: flex;
+      display: grid;
+      grid-template-columns: 180px 1fr 140px;
       gap: 12px;
+      margin-bottom: 12px;
     }
-    input[type="text"] {
-      flex: 1;
+    @media (max-width: 768px) {
+      .input-group { grid-template-columns: 1fr; }
+    }
+    select, input[type="text"], input[type="password"] {
       padding: 12px 16px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: #0f172a;
       color: var(--text);
-      font-size: 16px;
+      font-size: 15px;
       outline: none;
     }
-    input[type="text"]:focus {
+    select:focus, input[type="text"]:focus, input[type="password"]:focus {
       border-color: var(--primary);
     }
     button {
@@ -81,7 +85,7 @@
       border: none;
       background: var(--primary);
       color: white;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s;
@@ -91,7 +95,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     .card {
       background: var(--card-bg);
@@ -105,7 +109,7 @@
       margin-bottom: 6px;
     }
     .card-val {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       color: #38bdf8;
     }
@@ -115,7 +119,7 @@
       border-radius: 12px;
       border: 1px solid var(--border);
       padding: 24px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     .media-card {
       display: grid;
@@ -140,7 +144,7 @@
       display: inline-block;
       background: #334155;
       color: #cbd5e1;
-      padding: 2px 8px;
+      padding: 3px 8px;
       border-radius: 4px;
       font-size: 12px;
       margin-right: 6px;
@@ -182,7 +186,7 @@
     <header>
       <div class="logo">
         <span>🍑 Emby Scraper Plus</span>
-        <span class="badge">v1.0.0</span>
+        <span class="badge">v1.1.0</span>
       </div>
       <div>
         <a href="https://github.com/RoaycL/emby-scraper-plus" target="_blank" style="color: var(--text-muted); text-decoration: none; font-size: 14px;">GitHub 仓库 ↗</a>
@@ -192,23 +196,36 @@
     <div class="status-panel">
       <div class="card">
         <div class="card-title">服务运行状态</div>
-        <div class="card-val" style="color: var(--accent);">● 正常运行 (Online)</div>
+        <div class="card-val" style="color: var(--accent);">● 正常在线 (Ready)</div>
       </div>
       <div class="card">
-        <div class="card-title">集成数据源</div>
-        <div class="card-val">DMM / R18Dev / AVBase / Gfriends</div>
+        <div class="card-title">集成智能数据源</div>
+        <div class="card-val">DMM / R18Dev / AVBase / JavBus / JavDB / FC2 / Gfriends</div>
       </div>
       <div class="card">
-        <div class="card-title">Emby / Jellyfin 协议</div>
-        <div class="card-val">MetaTube REST v1 兼容</div>
+        <div class="card-title">客户端协议</div>
+        <div class="card-val">MetaTube REST v1 完全兼容</div>
       </div>
     </div>
 
     <div class="search-box">
-      <h3 style="margin-bottom: 12px; font-size: 16px;">🔍 番号在线测试与解析</h3>
+      <h3 style="margin-bottom: 12px; font-size: 16px;">🔍 番号在线刮削与解析测试</h3>
       <div class="input-group">
-        <input type="text" id="keyword" placeholder="输入番号测试，例如：SSIS-057、ABW-358、START-640" value="SSIS-057" onkeydown="if(event.key==='Enter') search();">
+        <select id="provider">
+          <option value="SMART" selected>⚡ 智能路由 (Smart Route)</option>
+          <option value="DMM">DMM / FANZA (GraphQL直连)</option>
+          <option value="R18DEV">R18Dev (日文汉字正名)</option>
+          <option value="AVBASE">AVBase (全源整合)</option>
+          <option value="JAVBUS">JavBus (dv=1 绕过验证)</option>
+          <option value="JAVDB">JavDB (3s 安全限速)</option>
+          <option value="FC2">FC2 / CMA (原图与下架镜像)</option>
+        </select>
+        <input type="text" id="keyword" placeholder="输入番号测试，例如：SSIS-057、ABW-358、START-640、FC2-PPV-1234567" value="SSIS-057" onkeydown="if(event.key==='Enter') search();">
         <button onclick="search()">立即刮削</button>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span style="font-size: 13px; color: var(--text-muted);">访问 Token (若服务端配置):</span>
+        <input type="password" id="token" placeholder="可选 Token" style="padding: 6px 12px; font-size: 13px; width: 200px;">
       </div>
     </div>
 
@@ -221,6 +238,7 @@
           <h2 id="title">-</h2>
           <div style="margin-bottom: 10px;">
             <span id="number-badge" class="meta-tag" style="background: #2563eb; color: #fff;">-</span>
+            <span id="prov-badge" class="meta-tag" style="background: #059669; color: #fff;">-</span>
             <span id="maker-badge" class="meta-tag">-</span>
             <span id="date-badge" class="meta-tag">-</span>
           </div>
@@ -237,32 +255,46 @@
     </div>
 
     <div class="card" style="margin-top: 24px;">
-      <h4 style="margin-bottom: 8px;">💡 在 fnOS 上的 Emby 配置指南：</h4>
-      <p style="font-size: 14px; color: var(--text-muted);">
+      <h4 style="margin-bottom: 8px;">💡 在 fnOS / 服务器上对接 Emby：</h4>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.8;">
         1. 在 Emby 中安装 <code>Jellyfin.Plugin.MetaTube</code> 插件。<br>
-        2. 打开插件配置页，将 <strong>服务器地址 (Server)</strong> 填写为：<code style="color: #60a5fa;">http://&lt;你的fnOS或本机IP&gt;:8080</code>。<br>
-        3. 保存后，Emby 即可通过智能路由与极速 GraphQL 接口自动刮削电影与人员头像！
+        2. 打开插件配置页，将 <strong>服务器地址 (Server)</strong> 填写为：<code style="color: #60a5fa;">http://&lt;你的服务器IP&gt;:8080</code>。<br>
+        3. 若启用了 <code>-token</code>，在插件 Token 框中填入相应密码。<br>
+        4. 保存后刷新媒体库，Emby 即可享有 DMM GraphQL 极速直连、JavBus dv 补丁与智能短路省流体验！
       </p>
     </div>
   </div>
 
   <script>
     let currentCode = '';
+    let currentProv = 'SMART';
+
     async function search() {
       const kw = document.getElementById('keyword').value.trim();
+      const prov = document.getElementById('provider').value;
+      const token = document.getElementById('token').value.trim();
       if (!kw) return;
+
       currentCode = kw;
+      currentProv = prov;
+
       const resSec = document.getElementById('result');
       resSec.style.display = 'block';
       document.getElementById('title').innerText = '正在智能路由刮削中...';
 
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+      }
+
       try {
-        const resp = await fetch('/v1/movies/SMART/' + encodeURIComponent(kw));
+        const resp = await fetch('/v1/movies/' + encodeURIComponent(prov) + '/' + encodeURIComponent(kw), { headers });
         const json = await resp.json();
         if (json.data) {
           const item = json.data;
           document.getElementById('title').innerText = item.title || kw;
           document.getElementById('number-badge').innerText = item.number || kw;
+          document.getElementById('prov-badge').innerText = '来源: ' + (item.provider || prov);
           document.getElementById('maker-badge').innerText = item.maker ? '片商: ' + item.maker : '';
           document.getElementById('date-badge').innerText = item.release_date ? '发售: ' + item.release_date : '';
           document.getElementById('summary').innerText = item.summary || '暂无简介';
@@ -276,7 +308,7 @@
 
           document.getElementById('raw-json').innerText = JSON.stringify(json.data, null, 2);
         } else {
-          document.getElementById('title').innerText = '未检索到该番号信息：' + (json.error ? json.error.message : '');
+          document.getElementById('title').innerText = '未检索到该番号信息：' + (json.error ? json.error.message : '无数据');
           document.getElementById('raw-json').innerText = JSON.stringify(json, null, 2);
         }
       } catch (err) {
@@ -291,7 +323,10 @@
 
     function downloadNfo() {
       if (currentCode) {
-        window.open('/v1/nfo/SMART/' + encodeURIComponent(currentCode), '_blank');
+        const token = document.getElementById('token').value.trim();
+        let url = '/v1/nfo/' + encodeURIComponent(currentProv) + '/' + encodeURIComponent(currentCode);
+        if (token) url += '?token=' + encodeURIComponent(token);
+        window.open(url, '_blank');
       }
     }
   </script>

@@ -11,7 +11,10 @@ import (
 	"github.com/RoaycL/emby-scraper-plus/internal/provider"
 	"github.com/RoaycL/emby-scraper-plus/internal/provider/avbase"
 	"github.com/RoaycL/emby-scraper-plus/internal/provider/dmm"
+	"github.com/RoaycL/emby-scraper-plus/internal/provider/fc2"
 	"github.com/RoaycL/emby-scraper-plus/internal/provider/gfriends"
+	"github.com/RoaycL/emby-scraper-plus/internal/provider/javbus"
+	"github.com/RoaycL/emby-scraper-plus/internal/provider/javdb"
 	"github.com/RoaycL/emby-scraper-plus/internal/provider/r18dev"
 )
 
@@ -38,6 +41,9 @@ func NewEngine() *Engine {
 	eng.Register(dmm.New())
 	eng.Register(r18dev.New())
 	eng.Register(avbase.New())
+	eng.Register(javbus.New())
+	eng.Register(javdb.New())
+	eng.Register(fc2.New())
 	eng.Register(gf)
 
 	return eng
@@ -56,15 +62,15 @@ func (e *Engine) GetProvider(name string) (provider.Provider, bool) {
 func (e *Engine) GetRouteChain(t ContentType) []string {
 	switch t {
 	case TypeCensored:
-		return []string{"DMM", "R18DEV", "AVBASE"}
+		return []string{"DMM", "R18DEV", "AVBASE", "JAVBUS", "JAVDB"}
 	case TypeAmateur:
-		return []string{"AVBASE", "DMM", "R18DEV"}
+		return []string{"AVBASE", "JAVBUS", "JAVDB", "DMM"}
 	case TypeUncensored:
-		return []string{"AVBASE"}
+		return []string{"AVBASE", "JAVBUS", "JAVDB"}
 	case TypeFC2:
-		return []string{"AVBASE"}
+		return []string{"FC2", "JAVDB", "AVBASE"}
 	default:
-		return []string{"DMM", "R18DEV", "AVBASE"}
+		return []string{"DMM", "R18DEV", "AVBASE", "JAVBUS", "JAVDB"}
 	}
 }
 
@@ -98,9 +104,30 @@ func (e *Engine) SmartGetMovieInfo(ctx context.Context, code string) (*model.Mov
 		}
 
 		if info != nil && info.Title != "" {
-			finalInfo = info
+			if finalInfo == nil {
+				finalInfo = info
+			} else {
+				// Merge missing fields
+				if finalInfo.CoverURL == "" {
+					finalInfo.CoverURL = info.CoverURL
+					finalInfo.BigCoverURL = info.BigCoverURL
+				}
+				if len(finalInfo.Actors) == 0 {
+					finalInfo.Actors = info.Actors
+				}
+				if finalInfo.Maker == "" {
+					finalInfo.Maker = info.Maker
+				}
+				if len(finalInfo.Genres) == 0 {
+					finalInfo.Genres = info.Genres
+				}
+				if finalInfo.Summary == "" {
+					finalInfo.Summary = info.Summary
+				}
+			}
+
 			// If essential fields are satisfied, short-circuit
-			if info.CoverURL != "" && len(info.Actors) > 0 && info.Maker != "" {
+			if finalInfo.CoverURL != "" && len(finalInfo.Actors) > 0 && finalInfo.Maker != "" && len(finalInfo.Genres) > 0 {
 				break
 			}
 		}

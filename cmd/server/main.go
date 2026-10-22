@@ -12,10 +12,18 @@ import (
 
 func main() {
 	port := flag.Int("port", config.GlobalConfig.Port, "Port to listen on")
-	proxy := flag.String("proxy", config.GlobalConfig.Proxy, "HTTP/SOCKS5 proxy address")
+	bind := flag.String("bind", config.GlobalConfig.Host, "Bind address")
+	token := flag.String("token", config.GlobalConfig.Token, "Access token for API authentication")
+	proxy := flag.String("proxy", config.GlobalConfig.Proxy, "HTTP/SOCKS5 outbound proxy address")
 	flag.Parse()
 
 	config.GlobalConfig.Port = *port
+	if *bind != "" {
+		config.GlobalConfig.Host = *bind
+	}
+	if *token != "" {
+		config.GlobalConfig.Token = *token
+	}
 	if *proxy != "" {
 		config.GlobalConfig.Proxy = *proxy
 	}
@@ -32,6 +40,9 @@ func main() {
 `
 	fmt.Println(banner)
 	log.Printf("[Emby Scraper Plus] Starting server on http://%s:%d ...\n", config.GlobalConfig.Host, config.GlobalConfig.Port)
+	if config.GlobalConfig.Token != "" {
+		log.Printf("[Emby Scraper Plus] Token authentication enabled\n")
+	}
 	if config.GlobalConfig.Proxy != "" {
 		log.Printf("[Emby Scraper Plus] Outbound proxy configured: %s\n", config.GlobalConfig.Proxy)
 	}
