@@ -95,10 +95,10 @@ func SetupRouter(engine *router.Engine) *gin.Engine {
 		v1.GET("/actors/search", h.SearchActor)
 		v1.GET("/actors/:provider/:id", h.GetActor)
 
-		// Image Proxy endpoints
-		v1.GET("/images/primary/:provider/:id", h.ProxyImage)
-		v1.GET("/images/thumb/:provider/:id", h.ProxyImage)
-		v1.GET("/images/backdrop/:provider/:id", h.ProxyImage)
+		// Image Proxy endpoints (support both GET and HEAD)
+		v1.Match([]string{http.MethodGet, http.MethodHead}, "/images/primary/:provider/:id", h.ProxyImage)
+		v1.Match([]string{http.MethodGet, http.MethodHead}, "/images/thumb/:provider/:id", h.ProxyImage)
+		v1.Match([]string{http.MethodGet, http.MethodHead}, "/images/backdrop/:provider/:id", h.ProxyImage)
 
 		// Direct NFO download endpoint
 		v1.GET("/nfo/:provider/:id", h.DownloadNFO)

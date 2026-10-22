@@ -84,8 +84,13 @@ func (h *Handler) ProxyImage(c *gin.Context) {
 	}
 
 	c.Header("Content-Type", contentType)
+	if resp.ContentLength > 0 {
+		c.Header("Content-Length", string(resp.Header.Get("Content-Length")))
+	}
 	c.Header("Cache-Control", "public, max-age=604800")
 	c.Status(http.StatusOK)
 
-	_, _ = io.Copy(c.Writer, resp.Body)
+	if c.Request.Method != http.MethodHead {
+		_, _ = io.Copy(c.Writer, resp.Body)
+	}
 }
