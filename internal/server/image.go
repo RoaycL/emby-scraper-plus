@@ -64,6 +64,14 @@ func (h *Handler) ProxyImage(c *gin.Context) {
 	req.Header.Set("User-Agent", provider.DefaultUserAgent)
 	if strings.Contains(rawURL, "dmm.co.jp") || strings.Contains(rawURL, "dmm.com") {
 		req.Header.Set("Referer", "https://video.dmm.co.jp/")
+	} else if strings.Contains(rawURL, "javbus.com") || strings.Contains(rawURL, "javsee.one") || strings.Contains(rawURL, "busjav") {
+		req.Header.Set("Referer", "https://www.javbus.com/")
+	} else if strings.Contains(rawURL, "javdb.com") || strings.Contains(rawURL, "jdbstatic") {
+		req.Header.Set("Referer", "https://javdb.com/")
+	} else if strings.Contains(rawURL, "avbase.net") {
+		req.Header.Set("Referer", "https://www.avbase.net/")
+	} else if strings.Contains(rawURL, "fc2.com") {
+		req.Header.Set("Referer", "https://adult.contents.fc2.com/")
 	}
 
 	resp, err := imageClient.Do(req)
